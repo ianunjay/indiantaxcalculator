@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndianTaxCalculator • Your Friendly Tax Teacher (AY 2026-27)</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --success: #137333;
+            --accent: #fbbc05;
+            --light: #f8f9fa;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fe 100%);
+            margin: 0;
+            padding: 24px;
+            color: #222;
+            line-height: 1.82;
+        }
+        .container { max-width: 1140px; margin: 0 auto; }
+        header {
+            background: white;
+            padding: 42px 32px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 12px 50px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        h1 { color: var(--primary); font-size: 2.75rem; margin: 0 0 12px 0; }
+        .tagline { font-size: 1.35rem; color: #444; font-weight: 500; }
+        .progress {
+            display: flex;
+            background: white;
+            padding: 20px;
+            border-radius: 60px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .step {
+            padding: 14px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            background: #f1f3f4;
+            transition: all 0.3s;
+        }
+        .step-active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 6px rgba(26,115,232,0.25);
+        }
+        .section {
+            background: white;
+            border-radius: 24px;
+            padding: 42px;
+            margin-bottom: 40px;
+            box-shadow: 0 12px 50px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .section.active { display: block; }
+        .card {
+            background: var(--light);
+            border-radius: 16px;
+            padding: 28px;
+            margin: 26px 0;
+            border-left: 7px solid var(--success);
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin: 24px 0 10px;
+            color: #333;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+        }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
+        .info-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: help;
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 12px;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px 42px;
+            border-radius: 12px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+        button:hover { background: #1557b0; }
+        .inline-help {
+            font-size: 0.96rem;
+            color: #555;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        .learn-more {
+            background: #fff3cd;
+            padding: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .learn-content {
+            display: none;
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            margin-top: 16px;
+            border: 1px solid #eee;
+        }
+        .result-box {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            padding: 36px;
+            border-radius: 20px;
+            border: 3px solid #c8e6c9;
+            margin: 30px 0;
+            box-shadow: 0 10px 35px rgba(19,115,51,0.12);
+        }
+        .highlight { font-size: 2.15rem; font-weight: 700; color: var(--success); }
+        .warning {
+            background: #fce8e6;
+            padding: 22px;
+            border-radius: 14px;
+            border-left: 6px solid #ea4335;
+            margin: 28px 0;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            max-width: 560px;
+            width: 92%;
+            border-radius: 20px;
+            padding: 38px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .footer { text-align: center; padding: 60px 20px; color: #555; font-size: 0.97rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>IndianTaxCalculator</h1>
+            <p class="tagline">Your friendly tax teacher — explains everything simply with real stories and analogies</p>
+        </header>
+
+        <div class="progress" id="progress">
+            <div class="step step-active" onclick="goToStep(0)">Welcome</div>
+            <div class="step" onclick="goToStep(1)">Documents</div>
+            <div class="step" onclick="goToStep(2)">Your Income</div>
+            <div class="step" onclick="goToStep(3)">Tax Regime</div>
+            <div class="step" onclick="goToStep(4)">Your Tax Story</div>
+        </div>
+
+        <!-- Step 0 -->
+        <div id="step-0" class="section active">
+            <h2>Hi friend, welcome to IndianTaxCalculator!</h2>
+            <p>Tax filing can feel scary because of big words. I will explain everything like a simple story using clear analogies so you feel confident and in control.</p>
+            <div class="card">
+                <strong>Think of your tax like this:</strong> Every year you earn money (your income). The government asks for a report card called ITR. They calculate tax on the "final bill" after you show all your discount receipts (deductions and exemptions). Some tax is already cut automatically (TDS). We just need to report correctly and see the full picture together.
+            </div>
+            <button onclick="goToStep(1)">I'm ready — let's begin →</button>
+        </div>
+
+        <!-- Step 1: Documents -->
+        <div id="step-1" class="section">
+            <h2>Step 1: Gather Your Papers</h2>
+            
+            <div class="card">
+                <strong>Form 16 from every employer</strong> <button class="info-btn" onclick="showInfo('form16')">i</button><br>
+                <div class="inline-help">This is your official salary report card. Look for "Gross Salary" in Part B — this is the main number we need.</div>
+            </div>
+
+            <div class="card">
+                <strong>Annual Information Statement (AIS) and Form 26AS</strong><br>
+                These are the government's own passbook showing interest, dividends, and tax already deducted.
+                <div class="learn-more" onclick="toggleLearn(this)">How to open them — step by step</div>
+                <div class="learn-content">
+                    <p><strong>Official website:</strong> <a href="https://www.incometax.gov.in/iec/foportal/" target="_blank">https://www.incometax.gov.in</a></p>
+                    <ol>
+                        <li>Login with PAN and password.</li>
+                        <li>Go to Services → Annual Information Statement (AIS).</li>
+                        <li>Select FY 2025-26.</li>
+                    </ol>
+                    <p><strong>Why it matters:</strong> Banks report your interest and dividends here. Always check it.</p>
+                </div>
+            </div>
+
+            <button onclick="goToStep(2)">Next: Tell me about your income →</button>
+        </div>
+
+        <!-- Step 2: Income -->
+        <div id="step-2" class="section">
+            <h2>Step 2: The Money That Came Into Your Life This Year</h2>
+            
+            <label>Your Age Group <button class="info-btn" onclick="showInfo('age')">i</button></label>
+            <select id="age" onchange="liveUpdate()">
+                <option value="below60">Below 60 years</option>
+                <option value="60-80">60–80 years (Senior Citizen)</option>
+                <option value="above80">Above 80 years (Super Senior)</option>
+            </select>
+            <div class="inline-help">Age mainly gives you a higher starting line before tax in the Old Tax Regime.</div>
+
+            <label>Did you change jobs? <button class="info-btn" onclick="showInfo('jobs')">i</button></label>
+            <select id="jobs" onchange="toggleJobs()">
+                <option value="no">No – Single employer</option>
+                <option value="yes">Yes – Multiple employers</option>
+            </select>
+            <div class="inline-help">Add Gross Salary from every Form 16 you received.</div>
+
+            <div id="multiJobs" style="display:none;">
+                <label>Gross Salary – Employer 1 ₹</label>
+                <input type="number" id="sal1" value="700000" oninput="liveUpdate()">
+                <label>Gross Salary – Employer 2 ₹</label>
+                <input type="number" id="sal2" value="400000" oninput="liveUpdate()">
+            </div>
+
+            <label>Total Gross Salary ₹ <button class="info-btn" onclick="showInfo('salary')">i</button></label>
+            <input type="number" id="salary" value="1100000" oninput="liveUpdate()">
+            <div class="inline-help">Take this number directly from Form 16 Part B.</div>
+
+            <label>Interest Income (Savings/FD) ₹ <button class="info-btn" onclick="showInfo('interest')">i</button></label>
+            <input type="number" id="interest" value="45000" oninput="liveUpdate()">
+            <div class="inline-help">Even small interest must be reported. Check AIS for the exact amount.</div>
+
+            <label>Dividend Income ₹ <button class="info-btn" onclick="showInfo('dividend')">i</button></label>
+            <input type="number" id="dividend" value="18000" oninput="liveUpdate()">
+            <div class="inline-help">Fully taxable now. Check your broker or AIS.</div>
+
+            <button onclick="goToStep(3)">Next: Choose your tax regime →</button>
+        </div>
+
+        <!-- Step 3: Regime -->
+        <div id="step-3" class="section">
+            <h2>Step 3: New Tax Regime vs Old Tax Regime</h2>
+            
+            <div style="display:flex; gap:24px; margin:32px 0;">
+                <div onclick="chooseRegime('new')" id="newCard" style="flex:1; padding:30px; border:4px solid #34a853; border-radius:18px; cursor:pointer; background:#f8fff9;">
+                    <strong>New Tax Regime</strong><br>
+                    <small>Like a simple fixed-price thali — lower rates, fewer choices, but straightforward. Standard Deduction ₹75,000 + Rebate u/s 87A up to ₹60,000.</small>
+                </div>
+                <div onclick="chooseRegime('old')" id="oldCard" style="flex:1; padding:30px; border:3px solid #ddd; border-radius:18px; cursor:pointer;">
+                    <strong>Old Tax Regime</strong><br>
+                    <small>Like a full buffet — pick many dishes (Section 80C ₹1.5 lakh, HRA, etc.). Standard Deduction ₹50,000 + Rebate u/s 87A up to ₹12,500.</small>
+                </div>
+            </div>
+
+            <select id="regime" onchange="liveUpdate()">
+                <option value="new">New Tax Regime</option>
+                <option value="old">Old Tax Regime</option>
+            </select>
+
+            <div id="oldDeds" style="display:none; margin-top:32px;">
+                <label>Section 80C (Max ₹1,50,000 – Old Regime only) ₹ <button class="info-btn" onclick="showInfo('80c')">i</button></label>
+                <input type="number" id="ded80c" value="150000" max="150000" oninput="liveUpdate()">
+                <div class="inline-help">Special savings boxes: PPF, ELSS, life insurance, home loan principal, tuition fees. Put money here for a big discount on your tax bill.</div>
+
+                <label>HRA Exemption (Old Regime – if paying rent) ₹ <button class="info-btn" onclick="showInfo('hra')">i</button></label>
+                <input type="number" id="hra" value="0" oninput="liveUpdate()">
+                <div class="inline-help">If you receive House Rent Allowance and live in rented house, you can reduce your taxable income. Keep rent receipts ready.</div>
+
+                <label>Section 80D (Health Insurance) ₹ <button class="info-btn" onclick="showInfo('80d')">i</button></label>
+                <input type="number" id="ded80d" value="25000" oninput="liveUpdate()">
+            </div>
+
+            <div class="result-box" id="livePreview">Live preview updates here...</div>
+
+            <button onclick="goToStep(4)">Show My Complete Tax Story →</button>
+        </div>
+
+        <!-- Step 4: Results -->
+        <div id="step-4" class="section">
+            <h2>Your Tax Story This Year</h2>
+            
+            <div class="result-box" id="regimeRecommendation"></div>
+            <div class="result-box" id="detailedBreakdown"></div>
+            <div class="result-box" id="regimeComparison"></div>
+
+            <div class="card">
+                <strong>Common Mistakes to Avoid</strong>
+                <ul>
+                    <li>Not checking AIS and missing interest/dividend</li>
+                    <li>Claiming deductions without proofs</li>
+                    <li>Forgetting salary from previous employer</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <strong>Smart Ways to Save Tax</strong>
+                <ul>
+                    <li>Max out Section 80C (₹1.5 lakh) before 31 March</li>
+                    <li>Claim HRA with proper rent receipts</li>
+                    <li>Buy health insurance under Section 80D</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <strong>Next Steps</strong>
+                <ol>
+                    <li>Go to <a href="https://www.incometax.gov.in/iec/foportal/" target="_blank">https://www.incometax.gov.in</a></li>
+                    <li>Login → e-File → File ITR for AY 2026-27</li>
+                    <li>Select the recommended form and verify with Form 16 + AIS</li>
+                    <li>e-Verify with Aadhaar OTP</li>
+                </ol>
+                <p><strong>Due date (usually):</strong> 31 July 2026</p>
+            </div>
+
+            <button onclick="window.location.reload()">Start Fresh</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()" style="float:right; font-size:36px; cursor:pointer;">×</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Disclaimer:</strong> Educational tool only. Always verify on the official portal. Calculations based on AY 2026-27 rules.</p>
+    </div>
+
+    <script>
+        // Same accurate calculation logic as before
+        function showInfo(key) {
+            const body = document.getElementById('modalBody');
+            let html = '';
+            switch(key) {
+                case 'form16':
+                    html = `<h3>Form 16</h3><p>Your official salary report card from the company. "Gross Salary" is in Part B.</p>`;
+                    break;
+                case 'age':
+                    html = `<h3>Age Group</h3><p>Affects exemption limit mainly in Old Tax Regime.</p>`;
+                    break;
+                case 'jobs':
+                    html = `<h3>Multiple Employers</h3><p>Add Gross Salary from every Form 16 you received.</p>`;
+                    break;
+                case 'salary':
+                    html = `<h3>Gross Salary</h3><p>Total salary before deductions — from Form 16 Part B.</p>`;
+                    break;
+                case 'interest':
+                    html = `<h3>Interest Income</h3><p>Extra money from bank. Check AIS for exact amount.</p>`;
+                    break;
+                case 'dividend':
+                    html = `<h3>Dividend Income</h3><p>Profit share from shares/mutual funds — fully taxable.</p>`;
+                    break;
+                case '80c':
+                    html = `<h3>Section 80C</h3><p>Maximum ₹1,50,000 (Old Regime only). Common options: PPF, ELSS, home loan principal, tuition fees.</p>`;
+                    break;
+                case 'hra':
+                    html = `<h3>HRA Exemption</h3><p>Available in Old Regime if you pay rent. Keep receipts ready.</p>`;
+                    break;
+                case '80d':
+                    html = `<h3>Section 80D</h3><p>Health insurance deduction (Old Regime).</p>`;
+                    break;
+            }
+            body.innerHTML = html;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function toggleLearn(el) {
+            const content = el.nextElementSibling;
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleJobs() {
+            document.getElementById('multiJobs').style.display = document.getElementById('jobs').value === 'yes' ? 'block' : 'none';
+            liveUpdate();
+        }
+
+        function chooseRegime(reg) {
+            document.getElementById('regime').value = reg;
+            document.getElementById('oldDeds').style.display = (reg === 'old') ? 'block' : 'none';
+            liveUpdate();
+        }
+
+        function liveUpdate() {
+            const regime = document.getElementById('regime').value;
+            let salary = parseFloat(document.getElementById('salary').value) || 0;
+            if (document.getElementById('jobs').value === 'yes') {
+                salary = (parseFloat(document.getElementById('sal1').value) || 0) + (parseFloat(document.getElementById('sal2').value) || 0);
+            }
+            const interest = parseFloat(document.getElementById('interest').value) || 0;
+            const dividend = parseFloat(document.getElementById('dividend').value) || 0;
+            const rental = parseFloat(document.getElementById('rental').value) || 0;
+            const gross = salary + interest + dividend + rental;
+
+            let deductions = (regime === 'new') ? 75000 : 50000;
+            if (regime === 'old') {
+                deductions += parseFloat(document.getElementById('ded80c').value) || 0;
+                deductions += parseFloat(document.getElementById('ded80d').value) || 0;
+                deductions += parseFloat(document.getElementById('hra').value) || 0;
+            }
+
+            document.getElementById('livePreview').innerHTML = `
+                <strong>Live Preview</strong><br>
+                Gross Income: ₹${gross.toLocaleString('en-IN')}<br>
+                Deductions & Exemptions: ₹${deductions.toLocaleString('en-IN')}<br>
+                Regime: ${regime === 'new' ? 'New Tax Regime' : 'Old Tax Regime'}
+            `;
+        }
+
+        function calculateTax(regime, gross, deductions, age) {
+            let taxable = Math.max(0, gross - deductions);
+            let tax = 0;
+
+            if (regime === 'new') {
+                if (taxable > 2400000) tax += 0.30 * (taxable - 2400000);
+                if (taxable > 2000000) tax += 0.25 * Math.min(400000, taxable - 2000000);
+                if (taxable > 1600000) tax += 0.20 * Math.min(400000, taxable - 1600000);
+                if (taxable > 1200000) tax += 0.15 * Math.min(400000, taxable - 1200000);
+                if (taxable > 800000) tax += 0.10 * Math.min(400000, taxable - 800000);
+                if (taxable > 400000) tax += 0.05 * Math.min(400000, taxable - 400000);
+            } else {
+                let exemption = (age === 'below60') ? 250000 : (age === '60-80' ? 300000 : 500000);
+                let afterEx = Math.max(0, taxable - exemption);
+                if (afterEx > 1000000) tax += 0.30 * (afterEx - 1000000);
+                if (afterEx > 500000) tax += 0.20 * Math.min(500000, afterEx - 500000);
+                if (afterEx > 0) tax += 0.05 * Math.min(250000, afterEx);
+            }
+
+            let cess = tax * 0.04;
+            let before = tax + cess;
+            let rebate = 0;
+            if (regime === 'new' && taxable <= 1200000) rebate = Math.min(60000, before);
+            else if (regime === 'old' && taxable <= 500000) rebate = Math.min(12500, before);
+
+            return Math.max(0, before - rebate);
+        }
+
+        function goToStep(n) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('step-' + n).classList.add('active');
+
+            document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('step-active', i === n));
+
+            if (n === 4) showFinalResults();
+        }
+
+        function showFinalResults() {
+            const regime = document.getElementById('regime').value;
+            let salary = parseFloat(document.getElementById('salary').value) || 0;
+            if (document.getElementById('jobs').value === 'yes') {
+                salary = (parseFloat(document.getElementById('sal1').value)||0) + (parseFloat(document.getElementById('sal2').value)||0);
+            }
+            const interest = parseFloat(document.getElementById('interest').value) || 0;
+            const dividend = parseFloat(document.getElementById('dividend').value) || 0;
+            const rental = parseFloat(document.getElementById('rental').value) || 0;
+            const gross = salary + interest + dividend + rental;
+
+            let deductions = (regime === 'new') ? 75000 : 50000;
+            if (regime === 'old') {
+                deductions += parseFloat(document.getElementById('ded80c').value) || 0;
+                deductions += parseFloat(document.getElementById('ded80d').value) || 0;
+                deductions += parseFloat(document.getElementById('hra').value) || 0;
+            }
+
+            const finalTax = calculateTax(regime, gross, deductions, document.getElementById('age').value);
+            const otherTax = calculateTax(regime === 'new' ? 'old' : 'new', gross, deductions, document.getElementById('age').value);
+            const savings = Math.max(0, otherTax - finalTax);
+
+            let recHTML = (finalTax < otherTax) ?
+                `<strong class="highlight">✅ New Tax Regime is better for you</strong><br>You save approximately ₹${savings.toLocaleString('en-IN')} compared to Old Regime.` :
+                `<strong class="highlight">Old Tax Regime is better for you</strong><br>You save approximately ₹${savings.toLocaleString('en-IN')} due to higher deductions.`;
+
+            document.getElementById('regimeRecommendation').innerHTML = recHTML;
+
+            document.getElementById('detailedBreakdown').innerHTML = `
+                <strong>Your Tax Story — Step by Step</strong><br>
+                1. Gross Income: ₹${gross.toLocaleString('en-IN')}<br>
+                2. Deductions & Exemptions: ₹${deductions.toLocaleString('en-IN')}<br>
+                3. Taxable Income: ₹${Math.max(0, gross - deductions).toLocaleString('en-IN')}<br>
+                <strong>4. Final Tax Liability: ₹${finalTax.toLocaleString('en-IN')}</strong>
+            `;
+
+            document.getElementById('regimeComparison').innerHTML = `
+                <strong>New vs Old Regime</strong><br>
+                New Regime Tax: ₹${finalTax.toLocaleString('en-IN')}<br>
+                Old Regime Tax: ₹${otherTax.toLocaleString('en-IN')}<br>
+                <span style="color:var(--success); font-weight:700;">Difference: ₹${Math.abs(finalTax - otherTax).toLocaleString('en-IN')}</span>
+            `;
+        }
+
+        window.onload = () => {
+            goToStep(0);
+            liveUpdate();
+        };
+    </script>
+</body>
+</html>
